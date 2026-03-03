@@ -37,6 +37,7 @@ const (
 	ToolConversationsLeave          = "conversations_leave"
 	ToolConversationsJoin           = "conversations_join"
 	ToolChannelsList                = "channels_list"
+	ToolChannelsMe                  = "channels_me"
 	ToolUsergroupsList              = "usergroups_list"
 	ToolUsergroupsMe                = "usergroups_me"
 	ToolUsergroupsCreate            = "usergroups_create"
@@ -61,6 +62,7 @@ var ValidToolNames = []string{
 	ToolConversationsLeave,
 	ToolConversationsJoin,
 	ToolChannelsList,
+	ToolChannelsMe,
 	ToolUsergroupsList,
 	ToolUsergroupsMe,
 	ToolUsergroupsCreate,
@@ -416,6 +418,27 @@ func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger, enabledToo
 				mcp.Description("Comma-separated list of fields to match the query against. Allowed values: 'name', 'topic', 'purpose'. Example: 'name,topic,purpose' to search all fields. Default is 'name'."),
 			),
 		), channelsHandler.ChannelsHandler)
+	}
+
+	if shouldAddTool(ToolChannelsMe, enabledTools, "") {
+		s.AddTool(mcp.NewTool(ToolChannelsMe,
+			mcp.WithDescription("List channels you are a member of. Unlike channels_list which returns all workspace channels, this returns only channels you have joined. Useful on large workspaces where channels_list returns thousands of results."),
+			mcp.WithTitleAnnotation("My Channels"),
+			mcp.WithReadOnlyHintAnnotation(true),
+			mcp.WithString("channel_types",
+				mcp.Description("Comma-separated channel types. Allowed values: 'mpim', 'im', 'public_channel', 'private_channel'. Default: 'public_channel,private_channel'."),
+			),
+			mcp.WithString("sort",
+				mcp.Description("Type of sorting. Allowed values: 'popularity' (default) - sort by member count."),
+			),
+			mcp.WithNumber("limit",
+				mcp.DefaultNumber(100),
+				mcp.Description("Maximum number of items to return (1-999)."),
+			),
+			mcp.WithString("cursor",
+				mcp.Description("Cursor for pagination."),
+			),
+		), channelsHandler.ChannelsMeHandler)
 	}
 
 	// User groups tools
