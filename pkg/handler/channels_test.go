@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,6 +31,12 @@ type matchingRule struct {
 
 func setupTestEnv(t *testing.T) (*testEnv, func()) {
 	t.Helper()
+
+	// Integration tests require a live Slack token. Skip (rather than fail) when
+	// it is not provided, e.g. on forks/CI without the upstream secrets.
+	if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "" {
+		t.Skip("SLACK_MCP_XOXP_TOKEN not set; skipping integration test")
+	}
 
 	sseKey := uuid.New().String()
 	require.NotEmpty(t, sseKey, "sseKey must be generated for integration tests")
