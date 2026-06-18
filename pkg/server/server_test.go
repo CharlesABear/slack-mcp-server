@@ -116,6 +116,13 @@ func TestValidToolNames(t *testing.T) {
 			ToolSavedList:                   true,
 			ToolSavedUpdate:                 true,
 			ToolSavedClearCompleted:         true,
+			ToolCanvasCreate:                true,
+			ToolChannelCanvasCreate:         true,
+			ToolCanvasEdit:                  true,
+			ToolCanvasDelete:                true,
+			ToolCanvasSectionsLookup:        true,
+			ToolCanvasAccessSet:             true,
+			ToolCanvasAccessDelete:          true,
 		}
 
 		assert.Equal(t, len(expectedTools), len(ValidToolNames), "ValidToolNames should have %d tools", len(expectedTools))
@@ -148,6 +155,13 @@ func TestValidToolNames(t *testing.T) {
 		assert.Equal(t, "saved_list", ToolSavedList)
 		assert.Equal(t, "saved_update", ToolSavedUpdate)
 		assert.Equal(t, "saved_clear_completed", ToolSavedClearCompleted)
+		assert.Equal(t, "canvas_create", ToolCanvasCreate)
+		assert.Equal(t, "channel_canvas_create", ToolChannelCanvasCreate)
+		assert.Equal(t, "canvas_edit", ToolCanvasEdit)
+		assert.Equal(t, "canvas_delete", ToolCanvasDelete)
+		assert.Equal(t, "canvas_sections_lookup", ToolCanvasSectionsLookup)
+		assert.Equal(t, "canvas_access_set", ToolCanvasAccessSet)
+		assert.Equal(t, "canvas_access_delete", ToolCanvasAccessDelete)
 	})
 }
 
@@ -309,6 +323,55 @@ func TestShouldAddTool_WriteTool_Attachment(t *testing.T) {
 
 		result := shouldAddTool(ToolAttachmentGetData, []string{ToolAttachmentGetData}, "SLACK_MCP_ATTACHMENT_TOOL")
 		assert.True(t, result, "attachment_get_data should be registered when explicitly in enabledTools")
+	})
+}
+
+func TestShouldAddTool_WriteTool_Canvas(t *testing.T) {
+	writeTools := []string{
+		ToolCanvasCreate,
+		ToolChannelCanvasCreate,
+		ToolCanvasEdit,
+		ToolCanvasDelete,
+		ToolCanvasAccessSet,
+		ToolCanvasAccessDelete,
+	}
+
+	t.Run("write canvas tools NOT registered when env var unset and enabledTools empty", func(t *testing.T) {
+		cleanup := setEnv("SLACK_MCP_CANVAS_TOOLS", "")
+		defer cleanup()
+
+		for _, tool := range writeTools {
+			result := shouldAddTool(tool, []string{}, "SLACK_MCP_CANVAS_TOOLS")
+			assert.False(t, result, "%s should NOT be registered when SLACK_MCP_CANVAS_TOOLS is unset", tool)
+		}
+	})
+
+	t.Run("write canvas tools registered when env var set", func(t *testing.T) {
+		cleanup := setEnv("SLACK_MCP_CANVAS_TOOLS", "true")
+		defer cleanup()
+
+		for _, tool := range writeTools {
+			result := shouldAddTool(tool, []string{}, "SLACK_MCP_CANVAS_TOOLS")
+			assert.True(t, result, "%s should be registered when SLACK_MCP_CANVAS_TOOLS is set", tool)
+		}
+	})
+
+	t.Run("write canvas tool registered when explicitly in enabledTools without env var", func(t *testing.T) {
+		cleanup := setEnv("SLACK_MCP_CANVAS_TOOLS", "")
+		defer cleanup()
+
+		result := shouldAddTool(ToolCanvasCreate, []string{ToolCanvasCreate}, "SLACK_MCP_CANVAS_TOOLS")
+		assert.True(t, result, "canvas_create should be registered when explicitly in enabledTools")
+	})
+
+	t.Run("read-only canvas_sections_lookup is ungated", func(t *testing.T) {
+		cleanup := setEnv("SLACK_MCP_CANVAS_TOOLS", "")
+		defer cleanup()
+
+		// Read-only tools are registered with an empty envVarName, matching the
+		// repo's treatment of other read tools (e.g. conversations_history).
+		result := shouldAddTool(ToolCanvasSectionsLookup, []string{}, "")
+		assert.True(t, result, "canvas_sections_lookup should be registered with empty enabledTools (read-only, ungated)")
 	})
 }
 

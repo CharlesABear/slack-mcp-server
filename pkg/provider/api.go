@@ -257,6 +257,15 @@ type SlackAPI interface {
 	CreateUserGroupContext(ctx context.Context, userGroup slack.UserGroup, options ...slack.CreateUserGroupOption) (slack.UserGroup, error)
 	UpdateUserGroupContext(ctx context.Context, userGroupID string, options ...slack.UpdateUserGroupsOption) (slack.UserGroup, error)
 	UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string, options ...slack.UpdateUserGroupMembersOption) (slack.UserGroup, error)
+
+	// Canvas API methods (canvases:write / canvases:read scopes; bot-token compatible)
+	CreateCanvasContext(ctx context.Context, title string, documentContent slack.DocumentContent) (string, error)
+	CreateChannelCanvasContext(ctx context.Context, channelID string, documentContent slack.DocumentContent, options ...slack.CreateChannelCanvasOption) (string, error)
+	EditCanvasContext(ctx context.Context, params slack.EditCanvasParams) error
+	DeleteCanvasContext(ctx context.Context, canvasID string) error
+	LookupCanvasSectionsContext(ctx context.Context, params slack.LookupCanvasSectionsParams) ([]slack.CanvasSection, error)
+	SetCanvasAccessContext(ctx context.Context, params slack.SetCanvasAccessParams) error
+	DeleteCanvasAccessContext(ctx context.Context, params slack.DeleteCanvasAccessParams) error
 }
 
 type MCPSlackClient struct {
@@ -599,6 +608,34 @@ func (c *MCPSlackClient) UpdateUserGroupContext(ctx context.Context, userGroupID
 
 func (c *MCPSlackClient) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string, options ...slack.UpdateUserGroupMembersOption) (slack.UserGroup, error) {
 	return c.slackClient.UpdateUserGroupMembersContext(ctx, userGroup, members, options...)
+}
+
+func (c *MCPSlackClient) CreateCanvasContext(ctx context.Context, title string, documentContent slack.DocumentContent) (string, error) {
+	return c.slackClient.CreateCanvasContext(ctx, title, documentContent)
+}
+
+func (c *MCPSlackClient) CreateChannelCanvasContext(ctx context.Context, channelID string, documentContent slack.DocumentContent, options ...slack.CreateChannelCanvasOption) (string, error) {
+	return c.slackClient.CreateChannelCanvasContext(ctx, channelID, documentContent, options...)
+}
+
+func (c *MCPSlackClient) EditCanvasContext(ctx context.Context, params slack.EditCanvasParams) error {
+	return c.slackClient.EditCanvasContext(ctx, params)
+}
+
+func (c *MCPSlackClient) DeleteCanvasContext(ctx context.Context, canvasID string) error {
+	return c.slackClient.DeleteCanvasContext(ctx, canvasID)
+}
+
+func (c *MCPSlackClient) LookupCanvasSectionsContext(ctx context.Context, params slack.LookupCanvasSectionsParams) ([]slack.CanvasSection, error) {
+	return c.slackClient.LookupCanvasSectionsContext(ctx, params)
+}
+
+func (c *MCPSlackClient) SetCanvasAccessContext(ctx context.Context, params slack.SetCanvasAccessParams) error {
+	return c.slackClient.SetCanvasAccessContext(ctx, params)
+}
+
+func (c *MCPSlackClient) DeleteCanvasAccessContext(ctx context.Context, params slack.DeleteCanvasAccessParams) error {
+	return c.slackClient.DeleteCanvasAccessContext(ctx, params)
 }
 
 func (c *MCPSlackClient) IsEnterprise() bool {

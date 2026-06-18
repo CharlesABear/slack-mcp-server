@@ -50,6 +50,8 @@ Instead of using browser-based tokens (`xoxc`/`xoxd`), you can use a User OAuth 
     - `usergroups:read` - View user groups in a workspace.
     - `usergroups:write` - Create and manage user groups.
     - `channels:write` - Join and leave public channels.
+    - `canvases:read` - View canvases (required for `canvas_sections_lookup`).
+    - `canvases:write` - Create, edit, delete and share canvases (required for the canvas write tools).
 
 3. Install the app to your workspace
 4. Copy the "User OAuth Token" (starts with `xoxp-`)
@@ -80,7 +82,9 @@ To create the app from a manifest with permissions preconfigured, use the follow
                 "search:read",
                 "usergroups:read",
                 "usergroups:write",
-                "channels:write"
+                "channels:write",
+                "canvases:read",
+                "canvases:write"
             ]
         }
     },
@@ -97,7 +101,7 @@ To create the app from a manifest with permissions preconfigured, use the follow
 You can also use a Bot token instead of a User token:
 
 1. Go to [api.slack.com/apps](https://api.slack.com/apps) and create a new app
-2. Under "OAuth & Permissions", add Bot Token Scopes (same as User scopes above, except replace `search:read` with `search:read.public` and replace `channels:write` with `channels:join` + `channels:manage`)
+2. Under "OAuth & Permissions", add Bot Token Scopes (same as User scopes above, except replace `search:read` with `search:read.public` and replace `channels:write` with `channels:join` + `channels:manage`). The `canvases:read` and `canvases:write` scopes are valid for bot tokens too, so the canvas tools work with `xoxb-` tokens.
 3. Install the app to your workspace
 4. Copy the "Bot User OAuth Token" (starts with `xoxb-`)
 5. **Important**: Bot must be invited to channels for access

@@ -236,6 +236,107 @@ Clear all completed saved items from the "Save for Later" panel. This is a bulk 
 
 - **Parameters:** None.
 
+### 19. canvas_create
+Create a new standalone canvas with markdown content and return its `canvas_id`.
+
+> **Note:** Canvas write tools are disabled by default for safety. To enable `canvas_create`, `channel_canvas_create`, `canvas_edit`, `canvas_delete`, `canvas_access_set`, and `canvas_access_delete`, set the `SLACK_MCP_CANVAS_TOOLS` environment variable. See the Environment Variables section below for details. Canvas scopes are valid for bot (`xoxb`) and user (`xoxp`) tokens — these tools are available with bot tokens.
+
+- **Parameters:**
+  - `title` (string, optional): Title for the canvas.
+  - `markdown` (string, required): Canvas body in Slack markdown. Example: `# Heading\n\nSome text`.
+
+- **Returns:** JSON with `canvas_id` and `status`.
+
+> **Required OAuth scopes:** `canvases:write`
+
+### 20. channel_canvas_create
+Create a canvas attached to a channel (`conversations.canvases.create`) with markdown content and return its `canvas_id`.
+
+> **Note:** Disabled by default for safety. Enable via `SLACK_MCP_CANVAS_TOOLS`. Available with bot (`xoxb`) tokens.
+
+- **Parameters:**
+  - `channel_id` (string, required): ID of the channel to attach the canvas to, in format `Cxxxxxxxxxx`.
+  - `title` (string, optional): Title for the canvas.
+  - `markdown` (string, required): Canvas body in Slack markdown.
+
+- **Returns:** JSON with `canvas_id`, `channel_id`, and `status`.
+
+> **Required OAuth scopes:** `canvases:write`
+
+### 21. canvas_edit
+Apply a single edit operation to a canvas (one operation per call).
+
+> **Note:** Disabled by default for safety. Enable via `SLACK_MCP_CANVAS_TOOLS`. Available with bot (`xoxb`) tokens.
+
+- **Parameters:**
+  - `canvas_id` (string, required): ID of the canvas to edit, in format `Fxxxxxxxxxx`.
+  - `operation` (string, required): Edit operation. Allowed values: `insert_after`, `insert_before`, `insert_at_start`, `insert_at_end`, `replace`, `delete`.
+  - `section_id` (string, optional): Target section ID. Required for `insert_after`, `insert_before`, `replace`, and `delete`. Find IDs via `canvas_sections_lookup`.
+  - `markdown` (string, optional): Markdown content for the operation. Required for all operations except `delete`.
+
+- **Returns:** JSON with `canvas_id`, `operation`, and `status`.
+
+> **Required OAuth scopes:** `canvases:write`
+
+### 22. canvas_delete
+Delete a canvas by its ID.
+
+> **Note:** Disabled by default for safety. Enable via `SLACK_MCP_CANVAS_TOOLS`. Available with bot (`xoxb`) tokens.
+
+- **Parameters:**
+  - `canvas_id` (string, required): ID of the canvas to delete, in format `Fxxxxxxxxxx`.
+
+- **Returns:** JSON with `canvas_id` and `status`.
+
+> **Required OAuth scopes:** `canvases:write`
+
+### 23. canvas_sections_lookup
+Look up section IDs in a canvas matching criteria, so they can be targeted by `canvas_edit`. This is a read-only tool and is registered by default (no env var required).
+
+- **Parameters:**
+  - `canvas_id` (string, required): ID of the canvas to search, in format `Fxxxxxxxxxx`.
+  - `section_types` (string, optional): Comma-separated section types to match. Allowed values: `any_header`, `h1`, `h2`, `h3`.
+  - `contains_text` (string, optional): Only match sections containing this text.
+
+  At least one of `section_types` or `contains_text` is required.
+
+- **Returns:** JSON with `canvas_id`, `sections` (array of section IDs), and `count`.
+
+> **Required OAuth scopes:** `canvases:read`
+
+### 24. canvas_access_set
+Set the access level (`read` or `write`) on a canvas for the given channels and/or users.
+
+> **Note:** Disabled by default for safety. Enable via `SLACK_MCP_CANVAS_TOOLS`. Available with bot (`xoxb`) tokens.
+
+- **Parameters:**
+  - `canvas_id` (string, required): ID of the canvas, in format `Fxxxxxxxxxx`.
+  - `access_level` (string, required): Access level to grant. Allowed values: `read`, `write`.
+  - `channel_ids` (string, optional): Comma-separated channel IDs to grant access to (e.g. `C123,C456`).
+  - `user_ids` (string, optional): Comma-separated user IDs to grant access to (e.g. `U123,U456`).
+
+  At least one of `channel_ids` or `user_ids` is required.
+
+- **Returns:** JSON with `canvas_id`, `access_level`, and `status`.
+
+> **Required OAuth scopes:** `canvases:write`
+
+### 25. canvas_access_delete
+Remove access to a canvas for the given channels and/or users.
+
+> **Note:** Disabled by default for safety. Enable via `SLACK_MCP_CANVAS_TOOLS`. Available with bot (`xoxb`) tokens.
+
+- **Parameters:**
+  - `canvas_id` (string, required): ID of the canvas, in format `Fxxxxxxxxxx`.
+  - `channel_ids` (string, optional): Comma-separated channel IDs to remove access from.
+  - `user_ids` (string, optional): Comma-separated user IDs to remove access from.
+
+  At least one of `channel_ids` or `user_ids` is required.
+
+- **Returns:** JSON with `canvas_id` and `status`.
+
+> **Required OAuth scopes:** `canvases:write`
+
 ## Resources
 
 The Slack MCP Server exposes two special directory resources for easy access to workspace metadata:
@@ -293,11 +394,12 @@ Fetches a CSV directory of all users in the workspace.
 | `SLACK_MCP_REACTION_TOOL`        | No        | `nil`                     | Enable `reactions_add` and `reactions_remove` tools by setting to `true` for all channels, a comma-separated list of channel IDs to whitelist specific channels, or use `!` before a channel ID to allow all except specified ones. If empty, the tools are only registered when explicitly listed in `SLACK_MCP_ENABLED_TOOLS`. |
 | `SLACK_MCP_ATTACHMENT_TOOL`      | No        | `nil`                     | Enable the `attachment_get_data` tool by setting to `true`, `1`, or `yes`. Does not support channel-level restrictions. If empty, the tool is only registered when explicitly listed in `SLACK_MCP_ENABLED_TOOLS`. |
 | `SLACK_MCP_MARK_TOOL`             | No        | `nil`                     | Enable the `conversations_mark` tool by setting to `true` or `1`. Disabled by default to prevent accidental marking of messages as read.                                                                                                                                                  |
+| `SLACK_MCP_CANVAS_TOOLS`          | No        | `nil`                     | Enable the canvas write tools (`canvas_create`, `channel_canvas_create`, `canvas_edit`, `canvas_delete`, `canvas_access_set`, `canvas_access_delete`) by setting to `true` (or any non-empty value). If empty, these tools are only registered when explicitly listed in `SLACK_MCP_ENABLED_TOOLS`. The read-only `canvas_sections_lookup` tool is always registered and does not require this variable. Requires the `canvases:write` scope (valid for both bot `xoxb` and user `xoxp` tokens). |
 | `SLACK_MCP_USERS_CACHE`           | No        | `~/Library/Caches/slack-mcp-server/users_cache.json` (macOS)<br>`~/.cache/slack-mcp-server/users_cache.json` (Linux)<br>`%LocalAppData%/slack-mcp-server/users_cache.json` (Windows) | Path to the users cache file. Used to cache Slack user information to avoid repeated API calls on startup. |
 | `SLACK_MCP_CHANNELS_CACHE`        | No        | `~/Library/Caches/slack-mcp-server/channels_cache_v2.json` (macOS)<br>`~/.cache/slack-mcp-server/channels_cache_v2.json` (Linux)<br>`%LocalAppData%/slack-mcp-server/channels_cache_v2.json` (Windows) | Path to the channels cache file. Used to cache Slack channel information to avoid repeated API calls on startup. |
 | `SLACK_MCP_LOG_LEVEL`             | No        | `info`                    | Log-level for stdout or stderr. Valid values are: `debug`, `info`, `warn`, `error`, `panic` and `fatal`                                                                                                                                                                                   |
 | `SLACK_MCP_GOVSLACK`              | No        | `nil`                     | Set to `true` to enable [GovSlack](https://slack.com/solutions/govslack) mode. Routes API calls to `slack-gov.com` endpoints instead of `slack.com` for FedRAMP-compliant government workspaces.                                                                                          |
-| `SLACK_MCP_ENABLED_TOOLS`         | No        | `nil`                     | Comma-separated list of tools to register. If empty, all read-only tools and usergroups tools are registered; write tools (`conversations_add_message`, `reactions_add`, `reactions_remove`, `attachment_get_data`) require their specific env var OR must be explicitly listed here. When a write tool is listed here, it's enabled without channel restrictions. Available tools: `conversations_history`, `conversations_replies`, `conversations_add_message`, `reactions_add`, `reactions_remove`, `attachment_get_data`, `conversations_search_messages`, `channels_list`, `usergroups_list`, `usergroups_me`, `usergroups_create`, `usergroups_update`, `usergroups_users_update`. |
+| `SLACK_MCP_ENABLED_TOOLS`         | No        | `nil`                     | Comma-separated list of tools to register. If empty, all read-only tools and usergroups tools are registered; write tools (`conversations_add_message`, `reactions_add`, `reactions_remove`, `attachment_get_data`, the canvas write tools) require their specific env var OR must be explicitly listed here. When a write tool is listed here, it's enabled without channel restrictions. Available tools: `conversations_history`, `conversations_replies`, `conversations_add_message`, `reactions_add`, `reactions_remove`, `attachment_get_data`, `conversations_search_messages`, `channels_list`, `usergroups_list`, `usergroups_me`, `usergroups_create`, `usergroups_update`, `usergroups_users_update`, `canvas_create`, `channel_canvas_create`, `canvas_edit`, `canvas_delete`, `canvas_sections_lookup`, `canvas_access_set`, `canvas_access_delete`. |
 
 *You need one of: `xoxp` (user), `xoxb` (bot), or both `xoxc`/`xoxd` tokens for authentication.
 
