@@ -47,6 +47,13 @@ const (
 	ToolSavedList                   = "saved_list"
 	ToolSavedUpdate                 = "saved_update"
 	ToolSavedClearCompleted         = "saved_clear_completed"
+	ToolCanvasCreate                = "canvas_create"
+	ToolChannelCanvasCreate         = "channel_canvas_create"
+	ToolCanvasEdit                  = "canvas_edit"
+	ToolCanvasDelete                = "canvas_delete"
+	ToolCanvasSectionsLookup        = "canvas_sections_lookup"
+	ToolCanvasAccessSet             = "canvas_access_set"
+	ToolCanvasAccessDelete          = "canvas_access_delete"
 )
 
 var ValidToolNames = []string{
@@ -72,6 +79,13 @@ var ValidToolNames = []string{
 	ToolSavedList,
 	ToolSavedUpdate,
 	ToolSavedClearCompleted,
+	ToolCanvasCreate,
+	ToolChannelCanvasCreate,
+	ToolCanvasEdit,
+	ToolCanvasDelete,
+	ToolCanvasSectionsLookup,
+	ToolCanvasAccessSet,
+	ToolCanvasAccessDelete,
 }
 
 func ValidateEnabledTools(tools []string) error {
@@ -589,6 +603,139 @@ func NewMCPServer(provider *provider.ApiProvider, logger *zap.Logger, enabledToo
 				mcp.WithDestructiveHintAnnotation(true),
 			), savedHandler.SavedClearCompletedHandler)
 		}
+	}
+
+	// Canvas tools. Canvas scopes (canvases:write, canvases:read) are valid for
+	// both bot (xoxb) and user (xoxp) tokens, so these are NOT excluded for bot
+	// tokens. Write/destructive canvas tools are gated behind SLACK_MCP_CANVAS_TOOLS
+	// (same opt-in pattern as conversations_add_message / SLACK_MCP_ADD_MESSAGE_TOOL);
+	// the read-only canvas_sections_lookup follows the read-tool convention and is ungated.
+	canvasHandler := handler.NewCanvasHandler(provider, logger)
+
+	if shouldAddTool(ToolCanvasCreate, enabledTools, "SLACK_MCP_CANVAS_TOOLS") {
+		s.AddTool(mcp.NewTool(ToolCanvasCreate,
+			mcp.WithDescription("Create a new standalone canvas with markdown content. Returns the new canvas_id. Requires the canvases:write scope (available to both bot xoxb and user xoxp tokens)."),
+			mcp.WithTitleAnnotation("Create Canvas"),
+			mcp.WithDestructiveHintAnnotation(true),
+			mcp.WithString("title",
+				mcp.Description("Optional title for the canvas."),
+			),
+			mcp.WithString("markdown",
+				mcp.Required(),
+				mcp.Description("Canvas body in Slack markdown. Example: '# Heading\\n\\nSome text'."),
+			),
+		), canvasHandler.CanvasCreateHandler)
+	}
+
+	if shouldAddTool(ToolChannelCanvasCreate, enabledTools, "SLACK_MCP_CANVAS_TOOLS") {
+		s.AddTool(mcp.NewTool(ToolChannelCanvasCreate,
+			mcp.WithDescription("Create a canvas attached to a channel (conversations.canvases.create) with markdown content. Returns the new canvas_id. Requires the canvases:write scope."),
+			mcp.WithTitleAnnotation("Create Channel Canvas"),
+			mcp.WithDestructiveHintAnnotation(true),
+			mcp.WithString("channel_id",
+				mcp.Required(),
+				mcp.Description("ID of the channel to attach the canvas to, in format Cxxxxxxxxxx."),
+			),
+			mcp.WithString("title",
+				mcp.Description("Optional title for the canvas."),
+			),
+			mcp.WithString("markdown",
+				mcp.Required(),
+				mcp.Description("Canvas body in Slack markdown."),
+			),
+		), canvasHandler.CanvasChannelCreateHandler)
+	}
+
+	if shouldAddTool(ToolCanvasEdit, enabledTools, "SLACK_MCP_CANVAS_TOOLS") {
+		s.AddTool(mcp.NewTool(ToolCanvasEdit,
+			mcp.WithDescription("Apply a single edit operation to a canvas (one operation per call). Operations: 'insert_after', 'insert_before', 'insert_at_start', 'insert_at_end', 'replace', 'delete'. The insert_after, insert_before, replace and delete operations require section_id (use canvas_sections_lookup to find section IDs). Requires the canvases:write scope."),
+			mcp.WithTitleAnnotation("Edit Canvas"),
+			mcp.WithDestructiveHintAnnotation(true),
+			mcp.WithString("canvas_id",
+				mcp.Required(),
+				mcp.Description("ID of the canvas to edit, in format Fxxxxxxxxxx."),
+			),
+			mcp.WithString("operation",
+				mcp.Required(),
+				mcp.Description("Edit operation: 'insert_after', 'insert_before', 'insert_at_start', 'insert_at_end', 'replace', or 'delete'."),
+			),
+			mcp.WithString("section_id",
+				mcp.Description("Target section ID. Required for 'insert_after', 'insert_before', 'replace', and 'delete'. Find IDs via canvas_sections_lookup."),
+			),
+			mcp.WithString("markdown",
+				mcp.Description("Markdown content for the operation. Required for all operations except 'delete'."),
+			),
+		), canvasHandler.CanvasEditHandler)
+	}
+
+	if shouldAddTool(ToolCanvasDelete, enabledTools, "SLACK_MCP_CANVAS_TOOLS") {
+		s.AddTool(mcp.NewTool(ToolCanvasDelete,
+			mcp.WithDescription("Delete a canvas by its ID. Requires the canvases:write scope."),
+			mcp.WithTitleAnnotation("Delete Canvas"),
+			mcp.WithDestructiveHintAnnotation(true),
+			mcp.WithString("canvas_id",
+				mcp.Required(),
+				mcp.Description("ID of the canvas to delete, in format Fxxxxxxxxxx."),
+			),
+		), canvasHandler.CanvasDeleteHandler)
+	}
+
+	if shouldAddTool(ToolCanvasSectionsLookup, enabledTools, "") {
+		s.AddTool(mcp.NewTool(ToolCanvasSectionsLookup,
+			mcp.WithDescription("Look up section IDs in a canvas matching criteria, so they can be targeted by canvas_edit. Provide at least one of section_types or contains_text. Requires the canvases:read scope."),
+			mcp.WithTitleAnnotation("Lookup Canvas Sections"),
+			mcp.WithReadOnlyHintAnnotation(true),
+			mcp.WithString("canvas_id",
+				mcp.Required(),
+				mcp.Description("ID of the canvas to search, in format Fxxxxxxxxxx."),
+			),
+			mcp.WithString("section_types",
+				mcp.Description("Comma-separated section types to match. Allowed values: 'any_header', 'h1', 'h2', 'h3'."),
+			),
+			mcp.WithString("contains_text",
+				mcp.Description("Only match sections containing this text."),
+			),
+		), canvasHandler.CanvasSectionsLookupHandler)
+	}
+
+	if shouldAddTool(ToolCanvasAccessSet, enabledTools, "SLACK_MCP_CANVAS_TOOLS") {
+		s.AddTool(mcp.NewTool(ToolCanvasAccessSet,
+			mcp.WithDescription("Set the access level (read or write) on a canvas for the given channels and/or users. Provide at least one of channel_ids or user_ids. Requires the canvases:write scope."),
+			mcp.WithTitleAnnotation("Set Canvas Access"),
+			mcp.WithDestructiveHintAnnotation(true),
+			mcp.WithString("canvas_id",
+				mcp.Required(),
+				mcp.Description("ID of the canvas, in format Fxxxxxxxxxx."),
+			),
+			mcp.WithString("access_level",
+				mcp.Required(),
+				mcp.Description("Access level to grant. Allowed values: 'read', 'write'."),
+			),
+			mcp.WithString("channel_ids",
+				mcp.Description("Comma-separated channel IDs to grant access to (e.g. 'C123,C456')."),
+			),
+			mcp.WithString("user_ids",
+				mcp.Description("Comma-separated user IDs to grant access to (e.g. 'U123,U456')."),
+			),
+		), canvasHandler.CanvasAccessSetHandler)
+	}
+
+	if shouldAddTool(ToolCanvasAccessDelete, enabledTools, "SLACK_MCP_CANVAS_TOOLS") {
+		s.AddTool(mcp.NewTool(ToolCanvasAccessDelete,
+			mcp.WithDescription("Remove access to a canvas for the given channels and/or users. Provide at least one of channel_ids or user_ids. Requires the canvases:write scope."),
+			mcp.WithTitleAnnotation("Remove Canvas Access"),
+			mcp.WithDestructiveHintAnnotation(true),
+			mcp.WithString("canvas_id",
+				mcp.Required(),
+				mcp.Description("ID of the canvas, in format Fxxxxxxxxxx."),
+			),
+			mcp.WithString("channel_ids",
+				mcp.Description("Comma-separated channel IDs to remove access from."),
+			),
+			mcp.WithString("user_ids",
+				mcp.Description("Comma-separated user IDs to remove access from."),
+			),
+		), canvasHandler.CanvasAccessDeleteHandler)
 	}
 
 	logger.Info("Authenticating with Slack API...",
