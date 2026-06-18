@@ -37,7 +37,7 @@ Below are prepared configurations:
 If you have npm installed, this is the fastest way to get started with `@charlesabear/slack-mcp-server` on Claude Desktop.
 
 > [!NOTE]
-> This fork is published to npm as the scoped package **`@charlesabear/slack-mcp-server`** (it includes the Slack Canvas tools). The upstream package name `slack-mcp-server` will install the original project **without** the canvas tools. If you maintain your own fork, see [Publishing the fork to npm](#publishing-the-fork-to-npm) and replace the scope with your own.
+> The npm package is **`@charlesabear/slack-mcp-server`** and includes the Slack Canvas tools. Use that package name in the examples below.
 
 Open your `claude_desktop_config.json` and add the mcp server to the list of `mcpServers`:
 
@@ -210,26 +210,26 @@ In case you would like to run it in `sse` mode, then you  should use `mcp-remote
 ```
 </details>
 
-### Publishing the fork to npm
+### Publishing to npm
 
-`npx @charlesabear/slack-mcp-server@latest` only works once the scoped packages have been published to the public npm registry. This fork ships everything needed to publish them; the only manual prerequisite is an npm access token.
+`npx @charlesabear/slack-mcp-server@latest` works because the scoped packages are published to the public npm registry. Everything needed to publish (or cut a new release) is included in this repository; the only manual prerequisite is an npm access token.
 
 **One-time setup:**
 
-1. Create (or sign in to) an npm account whose **username or organization matches the package scope** — i.e. `charlesabear` for `@charlesabear/...`. If your npm name differs, change the scope in all `npm/*/package.json` files and in `npm/slack-mcp-server/bin/index.js` (the `SCOPE` constant), then update these docs.
-2. On [npmjs.com](https://www.npmjs.com/), create an **Automation** access token (Account → Access Tokens → Generate New Token → Automation).
+1. Sign in to an npm account whose **username or organization matches the package scope** — i.e. `charlesabear` for `@charlesabear/...`. To publish under a different scope, change it in all `npm/*/package.json` files and in `npm/slack-mcp-server/bin/index.js` (the `SCOPE` constant), then update these docs.
+2. On [npmjs.com](https://www.npmjs.com/), create an **Automation** access token (Account → Access Tokens → Generate New Token → Automation). Automation tokens bypass two-factor prompts, so the whole publish runs unattended.
 3. In the GitHub repo, add the token as a secret named **`NPM_TOKEN`** (Settings → Secrets and variables → Actions → New repository secret).
 
 **Publish:**
 
-- **Via GitHub Actions (recommended):** open the **Actions** tab → **Publish NPM (fork)** → **Run workflow**, enter the version (e.g. `1.2.0`), and run it. The workflow builds the per-platform binaries and publishes all seven packages (`@charlesabear/slack-mcp-server` plus the six platform binaries).
+- **Via GitHub Actions (recommended):** open the **Actions** tab → **Publish NPM** → **Run workflow**, enter the version (e.g. `1.2.0`), and run it. The workflow builds the per-platform binaries and publishes all seven packages (`@charlesabear/slack-mcp-server` plus the six platform binaries).
 - **Locally:** with the token exported, run:
 
   ```bash
   NPM_TOKEN="npm_xxx" make npm-publish NPM_VERSION=1.2.0
   ```
 
-Bump the version each time — npm rejects republishing an existing version. After the first successful publish, `npx @charlesabear/slack-mcp-server@latest` will install your fork (with the canvas tools) on any platform.
+Bump the version each time — npm rejects republishing an existing version. After publishing, `npx @charlesabear/slack-mcp-server@latest` installs it (with the canvas tools) on any platform.
 
 ### TLS and Exposing to the Internet
 

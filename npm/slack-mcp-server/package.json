@@ -1,7 +1,7 @@
 {
   "name": "@charlesabear/slack-mcp-server",
   "version": "1.2.0",
-  "description": "Model Context Protocol (MCP) server for Slack Workspaces, with Slack Canvas tools. Fork of korotovsky/slack-mcp-server. Supports Stdio and SSE transports, proxy settings and does not require any permissions or bots being created or approved by Workspace admins",
+  "description": "Model Context Protocol (MCP) server for Slack Workspaces, with Slack Canvas tools. Supports Stdio and SSE transports, proxy settings and does not require any permissions or bots being created or approved by Workspace admins",
   "main": "bin/index.js",
   "bin": {
     "slack-mcp-server": "bin/index.js"

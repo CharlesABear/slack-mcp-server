@@ -1,4 +1,4 @@
-name: Publish NPM (fork)
+name: Publish NPM
 
 # Manually-triggered workflow that builds the per-platform binaries and publishes
 # the scoped @charlesabear/slack-mcp-server packages to the public npm registry.
