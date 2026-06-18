@@ -25,16 +25,19 @@ The MCP server can be installed using the Cursor One-Click method.
 
 Below are prepared configurations:
 
- - `npx` and `xoxc/xoxd` method: [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=slack-mcp-server&config=eyJjb21tYW5kIjogIm5weCAteSBzbGFjay1tY3Atc2VydmVyQGxhdGVzdCAtLXRyYW5zcG9ydCBzdGRpbyIsImVudiI6IHsiU0xBQ0tfTUNQX1hPWENfVE9LRU4iOiAieG94Yy0uLi4iLCAiU0xBQ0tfTUNQX1hPWERfVE9LRU4iOiAieG94ZC0uLi4ifSwiZGlzYWJsZWQiOiBmYWxzZSwiYXV0b0FwcHJvdmUiOiBbXX0%3D)
- - `npx` and `xoxp` method: [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=slack-mcp-server&config=eyJjb21tYW5kIjogIm5weCAteSBzbGFjay1tY3Atc2VydmVyQGxhdGVzdCAtLXRyYW5zcG9ydCBzdGRpbyIsImVudiI6IHsiU0xBQ0tfTUNQX1hPWFBfVE9LRU4iOiAieG94cC0uLi4ifSwiZGlzYWJsZWQiOiBmYWxzZSwiYXV0b0FwcHJvdmUiOiBbXX0%3D)
- - `npx` and `xoxb` method: [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=slack-mcp-server&config=eyJjb21tYW5kIjogIm5weCAteSBzbGFjay1tY3Atc2VydmVyQGxhdGVzdCAtLXRyYW5zcG9ydCBzdGRpbyIsImVudiI6IHsiU0xBQ0tfTUNQX1hPWEJfVE9LRU4iOiAieG94Yi0uLi4ifSwiZGlzYWJsZWQiOiBmYWxzZSwiYXV0b0FwcHJvdmUiOiBbXX0%3D)
+ - `npx` and `xoxc/xoxd` method: [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=slack-mcp-server&config=eyJjb21tYW5kIjogIm5weCAteSBAY2hhcmxlc2FiZWFyL3NsYWNrLW1jcC1zZXJ2ZXJAbGF0ZXN0IC0tdHJhbnNwb3J0IHN0ZGlvIiwiZW52IjogeyJTTEFDS19NQ1BfWE9YQ19UT0tFTiI6ICJ4b3hjLS4uLiIsICJTTEFDS19NQ1BfWE9YRF9UT0tFTiI6ICJ4b3hkLS4uLiJ9LCJkaXNhYmxlZCI6IGZhbHNlLCJhdXRvQXBwcm92ZSI6IFtdfQ%3D%3D)
+ - `npx` and `xoxp` method: [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=slack-mcp-server&config=eyJjb21tYW5kIjogIm5weCAteSBAY2hhcmxlc2FiZWFyL3NsYWNrLW1jcC1zZXJ2ZXJAbGF0ZXN0IC0tdHJhbnNwb3J0IHN0ZGlvIiwiZW52IjogeyJTTEFDS19NQ1BfWE9YUF9UT0tFTiI6ICJ4b3hwLS4uLiJ9LCJkaXNhYmxlZCI6IGZhbHNlLCJhdXRvQXBwcm92ZSI6IFtdfQ%3D%3D)
+ - `npx` and `xoxb` method: [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=slack-mcp-server&config=eyJjb21tYW5kIjogIm5weCAteSBAY2hhcmxlc2FiZWFyL3NsYWNrLW1jcC1zZXJ2ZXJAbGF0ZXN0IC0tdHJhbnNwb3J0IHN0ZGlvIiwiZW52IjogeyJTTEFDS19NQ1BfWE9YQl9UT0tFTiI6ICJ4b3hiLS4uLiJ9LCJkaXNhYmxlZCI6IGZhbHNlLCJhdXRvQXBwcm92ZSI6IFtdfQ%3D%3D)
 
 > [!IMPORTANT]
 > Remember to replace tokens in the configuration with your own tokens, as they are just examples.
 
 ### Using npx
 
-If you have npm installed, this is the fastest way to get started with `slack-mcp-server` on Claude Desktop.
+If you have npm installed, this is the fastest way to get started with `@charlesabear/slack-mcp-server` on Claude Desktop.
+
+> [!NOTE]
+> This fork is published to npm as the scoped package **`@charlesabear/slack-mcp-server`** (it includes the Slack Canvas tools). The upstream package name `slack-mcp-server` will install the original project **without** the canvas tools. If you maintain your own fork, see [Publishing the fork to npm](#publishing-the-fork-to-npm) and replace the scope with your own.
 
 Open your `claude_desktop_config.json` and add the mcp server to the list of `mcpServers`:
 
@@ -49,7 +52,7 @@ Open your `claude_desktop_config.json` and add the mcp server to the list of `mc
       "command": "npx",
       "args": [
         "-y",
-        "slack-mcp-server@latest",
+        "@charlesabear/slack-mcp-server@latest",
         "--transport",
         "stdio"
       ],
@@ -69,7 +72,7 @@ Open your `claude_desktop_config.json` and add the mcp server to the list of `mc
       "command": "npx",
       "args": [
         "-y",
-        "slack-mcp-server@latest",
+        "@charlesabear/slack-mcp-server@latest",
         "--transport",
         "stdio"
       ],
@@ -89,7 +92,7 @@ Open your `claude_desktop_config.json` and add the mcp server to the list of `mc
       "command": "npx",
       "args": [
         "-y",
-        "slack-mcp-server@latest",
+        "@charlesabear/slack-mcp-server@latest",
         "--transport",
         "stdio"
       ],
@@ -206,6 +209,27 @@ In case you would like to run it in `sse` mode, then you  should use `mcp-remote
 }
 ```
 </details>
+
+### Publishing the fork to npm
+
+`npx @charlesabear/slack-mcp-server@latest` only works once the scoped packages have been published to the public npm registry. This fork ships everything needed to publish them; the only manual prerequisite is an npm access token.
+
+**One-time setup:**
+
+1. Create (or sign in to) an npm account whose **username or organization matches the package scope** — i.e. `charlesabear` for `@charlesabear/...`. If your npm name differs, change the scope in all `npm/*/package.json` files and in `npm/slack-mcp-server/bin/index.js` (the `SCOPE` constant), then update these docs.
+2. On [npmjs.com](https://www.npmjs.com/), create an **Automation** access token (Account → Access Tokens → Generate New Token → Automation).
+3. In the GitHub repo, add the token as a secret named **`NPM_TOKEN`** (Settings → Secrets and variables → Actions → New repository secret).
+
+**Publish:**
+
+- **Via GitHub Actions (recommended):** open the **Actions** tab → **Publish NPM (fork)** → **Run workflow**, enter the version (e.g. `1.2.0`), and run it. The workflow builds the per-platform binaries and publishes all seven packages (`@charlesabear/slack-mcp-server` plus the six platform binaries).
+- **Locally:** with the token exported, run:
+
+  ```bash
+  NPM_TOKEN="npm_xxx" make npm-publish NPM_VERSION=1.2.0
+  ```
+
+Bump the version each time — npm rejects republishing an existing version. After the first successful publish, `npx @charlesabear/slack-mcp-server@latest` will install your fork (with the canvas tools) on any platform.
 
 ### TLS and Exposing to the Internet
 

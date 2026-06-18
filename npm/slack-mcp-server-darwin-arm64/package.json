@@ -1,11 +1,19 @@
 {
-  "name": "slack-mcp-server-darwin-arm64",
-  "version": "1.1.0",
+  "name": "@charlesabear/slack-mcp-server-darwin-arm64",
+  "version": "1.2.0",
   "description": "Model Context Protocol (MCP) server for Slack Workspaces. This integration supports both Stdio and SSE transports, proxy settings and does not require any permissions or bots being created or approved by Workspace admins",
   "os": [
     "darwin"
   ],
   "cpu": [
     "arm64"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CharlesABear/slack-mcp-server.git"
+  },
+  "license": "MIT"
 }

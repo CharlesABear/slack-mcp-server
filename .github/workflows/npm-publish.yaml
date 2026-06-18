@@ -1,0 +1,57 @@
+name: Publish NPM (fork)
+
+# Manually-triggered workflow that builds the per-platform binaries and publishes
+# the scoped @charlesabear/slack-mcp-server packages to the public npm registry.
+#
+# Prerequisite (one-time): add an `NPM_TOKEN` repository secret
+# (Settings -> Secrets and variables -> Actions) containing an npm
+# "Automation" access token for an account that owns the @charlesabear scope.
+#
+# Run it from the Actions tab ("Run workflow") and enter the version to publish.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (semver, e.g. 1.2.0). Must be greater than any already-published version.'
+        required: true
+        default: '1.2.0'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: '1.25'
+  # Force pure-Go static builds so cross-compilation to all platforms works on the Linux runner.
+  CGO_ENABLED: '0'
+
+jobs:
+  publish:
+    name: Build binaries and publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build all platform binaries and publish scoped npm packages
+        # `make npm-publish` runs build-all-platforms + npm-copy-binaries, stamps the
+        # given version into every package.json, and publishes each package.
+        run: make npm-publish NPM_VERSION="${{ github.event.inputs.version }}"
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
