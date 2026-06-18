@@ -22,10 +22,18 @@ import (
 )
 
 func TestIntegrationConversations(t *testing.T) {
+	// Integration tests require live credentials. Skip (rather than fail) when
+	// they are not provided, e.g. on forks/CI without the upstream secrets.
+	if os.Getenv("SLACK_MCP_XOXP_TOKEN") == "" {
+		t.Skip("SLACK_MCP_XOXP_TOKEN not set; skipping integration test")
+	}
+	apiKey := os.Getenv("SLACK_MCP_OPENAI_API")
+	if apiKey == "" {
+		t.Skip("SLACK_MCP_OPENAI_API not set; skipping integration test")
+	}
+
 	sseKey := uuid.New().String()
 	require.NotEmpty(t, sseKey, "sseKey must be generated for integration tests")
-	apiKey := os.Getenv("SLACK_MCP_OPENAI_API")
-	require.NotEmpty(t, apiKey, "SLACK_MCP_OPENAI_API must be set for integration tests")
 
 	cfg := util.MCPConfig{
 		SSEKey:             sseKey,

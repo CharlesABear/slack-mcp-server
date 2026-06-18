@@ -3,6 +3,9 @@
 
 Model Context Protocol (MCP) server for Slack Workspaces. The most powerful MCP Slack server — supports Stdio, SSE and HTTP transports, proxy settings, DMs, Group DMs, Smart History fetch (by date or count), may work via OAuth or in complete stealth mode with no permissions and scopes in Workspace 😏.
 
+> [!NOTE]
+> Install from npm as **`@charlesabear/slack-mcp-server`** — e.g. `npx -y @charlesabear/slack-mcp-server@latest` (see [Using npx](docs/03-configuration-and-usage.md#using-npx)). This release adds the **Slack Canvas tools** (`canvas_create`, `channel_canvas_create`, `canvas_edit`, `canvas_delete`, `canvas_sections_lookup`, `canvas_access_set`, `canvas_access_delete`) — see [Tools](#tools).
+
 > [!IMPORTANT]  
 > We need your support! Each month, over 30,000 engineers visit this repository, and more than 9,000 are already using it.
 > 

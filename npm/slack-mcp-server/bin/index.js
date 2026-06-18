@@ -4,6 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
 
+// npm scope under which the per-platform binary packages are published.
+// The binary file inside each package keeps the unscoped name (see BINARY_MAP),
+// so only the package path is scoped here.
+const SCOPE = '@charlesabear';
+
 const BINARY_MAP = {
     darwin_x64:   { name: 'slack-mcp-server-darwin-amd64',    suffix: '' },
     darwin_arm64: { name: 'slack-mcp-server-darwin-arm64',    suffix: '' },
@@ -42,7 +47,7 @@ function resolveBinaryPath() {
     if (process.env.SLACK_MCP_DXT) {
         return require.resolve(path.join(__dirname, `${binary.name}${binary.suffix}`));
     } else {
-        return require.resolve(`${binary.name}/bin/${binary.name}${binary.suffix}`);
+        return require.resolve(`${SCOPE}/${binary.name}/bin/${binary.name}${binary.suffix}`);
     }
 }
 
